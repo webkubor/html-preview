@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ModelGo — 企业级 AI 用量治理</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #090616;
+    color: #e0def2;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #viewport {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 56px 8vw;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── BACKGROUND ── */
+  .cosmic-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1.2px, transparent 0),
+      linear-gradient(rgba(105,87,219,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(105,87,219,0.015) 1px, transparent 1px);
+    background-size: 60px 60px, 60px 60px, 60px 60px;
+  }
+
+  @keyframes glow-drift {
+    0%   { transform: scale(1)    translate(0,0); }
+    25%  { transform: scale(1.05) translate(12px,-8px); }
+    50%  { transform: scale(0.95) translate(-10px,12px); }
+    75%  { transform: scale(1.02) translate(6px,-4px); }
+    100% { transform: scale(1)    translate(0,0); }
+  }
+
+  .center-glow {
+    position: absolute;
+    top: 20%; left: 25%; right: 25%; bottom: 20%;
+    background: radial-gradient(ellipse, rgba(176,82,239,0.20), rgba(124,58,237,0.15), rgba(236,72,153,0.15), transparent 70%);
+    border-radius: 50%;
+    filter: blur(150px);
+    pointer-events: none;
+    mix-blend-mode: screen;
+    animation: glow-drift 18s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  /* Cross marks */
+  .space-cross {
+    position: absolute;
+    width: 9px; height: 9px;
+    pointer-events: none;
+    opacity: 0.12;
+    z-index: 0;
+  }
+  .space-cross::before, .space-cross::after {
+    content: '';
+    position: absolute;
+    background: #fff;
+  }
+  .space-cross::before { top: 4px; left: 0;  width: 9px; height: 1px; }
+  .space-cross::after  { top: 0;  left: 4px; width: 1px; height: 9px; }
+
+  /* Capsule animations */
+  @keyframes cap-tl {
+    0%   { transform: translate(0,0)         rotate(-12deg); }
+    38%  { transform: translate(120px,65px)  rotate(-4deg);  }
+    42%  { transform: translate(140px,75px)  rotate(0deg);   }
+    55%  { transform: translate(35px,15px)   rotate(-18deg); }
+    80%  { transform: translate(-15px,-10px) rotate(-12deg); }
+    100% { transform: translate(0,0)         rotate(-12deg); }
+  }
+  @keyframes cap-tr {
+    0%   { transform: translate(0,0)          rotate(45deg); }
+    38%  { transform: translate(-110px,60px)  rotate(54deg); }
+    42%  { transform: translate(-130px,70px)  rotate(57deg); }
+    55%  { transform: translate(-30px,10px)   rotate(40deg); }
+    80%  { transform: translate(15px,-5px)    rotate(45deg); }
+    100% { transform: translate(0,0)          rotate(45deg); }
+  }
+  @keyframes cap-bl {
+    0%   { transform: translate(0,0)           rotate(15deg); }
+    52%  { transform: translate(140px,-100px)  rotate(7deg);  }
+    56%  { transform: translate(160px,-115px)  rotate(4deg);  }
+    70%  { transform: translate(40px,-25px)    rotate(18deg); }
+    90%  { transform: translate(-10px,5px)     rotate(15deg); }
+    100% { transform: translate(0,0)           rotate(15deg); }
+  }
+  @keyframes cap-br {
+    0%   { transform: translate(0,0)            rotate(10deg); }
+    52%  { transform: translate(-150px,-105px)  rotate(17deg); }
+    56%  { transform: translate(-170px,-120px)  rotate(20deg); }
+    70%  { transform: translate(-45px,-30px)    rotate(6deg);  }
+    90%  { transform: translate(15px,8px)       rotate(10deg); }
+    100% { transform: translate(0,0)            rotate(10deg); }
+  }
+
+  .capsule { position: absolute; border-radius: 110px; pointer-events: none; z-index: 0; }
+  .cap-tl {
+    top: -64px; left: -64px; width: 384px; height: 192px;
+    border: 1.5px solid rgba(167,139,250,0.40);
+    background: rgba(9,6,22,0.10); backdrop-filter: blur(6px);
+    box-shadow: 0 0 90px rgba(168,85,247,0.4), inset 0 0 35px rgba(168,85,247,0.25);
+    animation: cap-tl 18s ease-in-out infinite;
+  }
+  .cap-tr {
+    top: 48px; right: -64px; width: 320px; height: 144px;
+    border: 1.5px solid rgba(244,114,182,0.20);
+    background: rgba(9,6,22,0.05); backdrop-filter: blur(4px);
+    box-shadow: 0 0 70px rgba(236,72,153,0.25), inset 0 0 30px rgba(236,72,153,0.15);
+    animation: cap-tr 18s ease-in-out infinite;
+  }
+  .cap-bl {
+    bottom: -96px; left: -80px; width: 420px; height: 224px;
+    border: 1.5px solid rgba(244,114,182,0.35);
+    background: rgba(9,6,22,0.10); backdrop-filter: blur(6px);
+    box-shadow: 0 0 80px rgba(219,39,119,0.35), inset 0 0 40px rgba(219,39,119,0.2);
+    animation: cap-bl 22s ease-in-out infinite;
+  }
+  .cap-br {
+    bottom: -80px; right: -48px; width: 540px; height: 240px;
+    border: 1.5px solid rgba(129,140,248,0.45);
+    background: rgba(9,6,22,0.20); backdrop-filter: blur(10px);
+    box-shadow: 0 0 90px rgba(99,102,241,0.55), inset 0 0 45px rgba(99,102,241,0.35);
+    animation: cap-br 22s ease-in-out infinite;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative; z-index: 10;
+    width: 100%; max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 48px;
+  }
+
+  .logo { display: flex; align-items: center; gap: 12px; user-select: none; }
+  .logo-icon { position: relative; width: 44px; height: 44px; }
+
+  @keyframes logo-pulse { 0%,100% { opacity: 0.20; } 50% { opacity: 0.35; } }
+  .logo-glow {
+    position: absolute; inset: 0;
+    background: #3b82f6; border-radius: 12px;
+    filter: blur(8px); opacity: 0.20;
+    animation: logo-pulse 2s ease-in-out infinite;
+  }
+  .logo-icon svg { width: 100%; height: 100%; position: relative; }
+
+  .logo-texts { display: flex; flex-direction: column; }
+  .logo-name {
+    font-weight: 700; letter-spacing: 0.2em;
+    color: #e2dfeb; font-size: 18px; line-height: 1;
+  }
+  .logo-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; color: #817b9b;
+    font-weight: 500; letter-spacing: 0.2em;
+    text-transform: uppercase; margin-top: 4px;
+  }
+
+  nav { display: flex; align-items: center; gap: 32px; }
+  nav a {
+    font-size: 14px; font-weight: 500;
+    color: #a1a1aa; text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav a.active { color: #fff; }
+  nav a:hover  { color: #fff; }
+
+  /* ── MAIN ── */
+  main {
+    position: relative; z-index: 10;
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    max-width: 1280px; margin: 0 auto; width: 100%;
+  }
+
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 210px;
+    gap: 32px; align-items: center;
+  }
+
+  .left-col { display: flex; flex-direction: column; gap: 24px; }
+  .heading-wrap { display: flex; flex-direction: column; gap: 20px; }
+
+  .main-h1 {
+    font-size: clamp(42px, 5.5vw, 72px);
+    font-weight: 600; color: #fff;
+    letter-spacing: -0.025em; line-height: 1.12;
+  }
+  .main-h1 .accent {
+    display: block; font-weight: 800;
+    background: linear-gradient(to right, #f4f4f5, #e4e4e7, #a1a1aa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .main-subtitle {
+    font-size: clamp(15px, 1.5vw, 20px);
+    color: #9f9abf; font-weight: 300;
+    letter-spacing: 0.02em; max-width: 520px; line-height: 1.65;
+  }
+
+  /* Content fade transition */
+  .c-fade { transition: opacity 0.4s ease, transform 0.4s ease; }
+  .c-fade.out { opacity: 0; transform: translateY(10px); pointer-events: none; }
+
+  /* CLI pill */
+  @keyframes border-flow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .cold-flow {
+    display: inline-block; border-radius: 9999px;
+    background: linear-gradient(90deg,
+      rgba(59,56,87,0.4), rgba(99,102,241,0.9),
+      rgba(6,182,212,1),  rgba(168,85,247,0.9), rgba(59,56,87,0.4));
+    background-size: 200% auto;
+    animation: border-flow 4s ease-in-out infinite;
+    padding: 1px;
+    box-shadow: 0 0 25px rgba(6,182,212,0.1), inset 0 0 15px rgba(139,92,246,0.05);
+  }
+  .cli-inner {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 10px 8px 16px; border-radius: 9999px;
+    background: rgba(19,16,45,0.9);
+  }
+  .cli-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: #817b9b;
+    text-transform: uppercase; letter-spacing: 0.2em;
+    background: #221f3c; padding: 2px 8px; border-radius: 4px;
+  }
+  .cli-command {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; color: #e2dfeb; padding-right: 8px;
+    user-select: text;
+  }
+  .term-icon {
+    width: 14px; height: 14px;
+    stroke: #06b6d4; fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    animation: logo-pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .copy-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: 9999px;
+    background: linear-gradient(to right, #7c3aed, #4f46e5);
+    color: #fff; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.1em; border: none; cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px rgba(139,92,246,0.3);
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { background: linear-gradient(to right, #6d28d9, #4338ca); box-shadow: 0 0 20px rgba(6,182,212,0.5); }
+  .copy-btn:active { transform: scale(0.95); }
+  .copy-btn.done { background: linear-gradient(to right, #065f46, #064e3b); box-shadow: 0 0 15px rgba(52,211,153,0.3); }
+  .copy-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .copy-btn span { color: inherit; }
+  .copy-btn.done span { color: #6ee7b7; }
+
+  .purple-line { width: 56px; height: 2px; background: #6351ba; }
+
+  /* ── STEPS ── */
+  .right-col {
+    display: flex; flex-direction: column;
+    align-items: flex-end; justify-content: center;
+  }
+  .steps { width: 100%; max-width: 210px; }
+
+  .step-btn {
+    display: flex; flex-direction: column; align-items: flex-end;
+    padding: 20px 0; cursor: pointer;
+    transition: opacity 0.4s, transform 0.4s;
+    opacity: 0.4; border: none; background: none;
+    color: inherit; font-family: inherit;
+    text-align: right; width: 100%;
+  }
+  .step-btn:hover { opacity: 0.8; }
+  .step-btn.active { opacity: 1; transform: scale(1.01); }
+
+  .step-num {
+    font-size: 22px; line-height: 1;
+    transition: color 0.4s; color: #4d496a;
+  }
+  .step-label {
+    font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; margin-top: 6px;
+    transition: color 0.4s; color: #4d496a;
+  }
+  .step-btn.active .step-label { color: #dedbf3; }
+  .step-btn[data-id="strategy"].active .step-num { color: #f15cbc; }
+  .step-btn[data-id="design"].active   .step-num { color: #eb429f; }
+  .step-btn[data-id="build"].active    .step-num { color: #a78bfa; }
+  .step-btn[data-id="scale"].active    .step-num { color: #60a5fa; }
+
+  .step-div { width: 100%; height: 1px; background: #221f3c; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 10;
+    width: 100%; max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding-top: 16px;
+  }
+  .foot-left { display: flex; flex-direction: column; gap: 16px; }
+  .foot-copy { font-size: 13px; color: #716e89; line-height: 1.6; }
+  .foot-badges {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: #55526e;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .foot-dot { color: #3b3854; }
+  .foot-right { display: flex; align-items: center; gap: 12px; }
+
+  .foot-key {
+    padding: 4px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; text-transform: uppercase;
+    color: #55526e; background: none;
+    border: 1px solid transparent; border-radius: 4px;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.1em;
+  }
+  .foot-key:hover { color: #d4d4d8; border-color: rgba(63,63,70,0.8); }
+
+  .foot-scan {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid #3b3857; border-radius: 6px;
+    background: rgba(19,16,45,0.4); cursor: pointer;
+    transition: all 0.3s; color: #71717a;
+  }
+  .foot-scan:hover { border-color: rgba(139,92,246,0.5); color: #c4b5fd; }
+  .foot-scan:active { transform: scale(0.9); }
+  .foot-scan svg {
+    width: 14px; height: 14px; stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  @media (max-width: 768px) {
+    #viewport { padding: 36px 6vw; }
+    .main-grid { grid-template-columns: 1fr; }
+    .right-col { align-items: flex-start; margin-top: 16px; }
+    .steps { max-width: 100%; }
+    .step-btn { align-items: flex-start; text-align: left; }
+    nav { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="viewport">
+
+  <div class="cosmic-grid"></div>
+  <div class="center-glow"></div>
+
+  <div class="space-cross" style="top:10%;left:50%"></div>
+  <div class="space-cross" style="top:35%;left:11%"></div>
+  <div class="space-cross" style="top:63%;left:14%"></div>
+  <div class="space-cross" style="top:80%;left:46%"></div>
+  <div class="space-cross" style="top:63%;left:80%"></div>
+  <div class="space-cross" style="top:22%;left:76%"></div>
+
+  <div class="capsule cap-tl"></div>
+  <div class="capsule cap-tr"></div>
+  <div class="capsule cap-bl"></div>
+  <div class="capsule cap-br"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <div class="logo-glow"></div>
+        <svg viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bg" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#2563EB"/>
+              <stop offset="100%" stop-color="#60A5FA"/>
+            </linearGradient>
+            <linearGradient id="pg" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#7C3AED"/>
+              <stop offset="100%" stop-color="#C084FC"/>
+            </linearGradient>
+          </defs>
+          <g transform="translate(75,50) rotate(-35) translate(-75,-50)">
+            <rect x="60" y="15" width="30" height="70" rx="15" stroke="url(#pg)" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g transform="translate(45,50) rotate(35) translate(-45,-50)">
+            <rect x="30" y="15" width="30" height="70" rx="15" stroke="url(#bg)" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g transform="translate(75,50) rotate(-35) translate(-75,-50)">
+            <path d="M 60 50 L 60 15 C 60 6.7 66.7 0 75 0 C 83.3 0 90 6.7 90 15 L 90 25" stroke="url(#pg)" stroke-width="14" fill="none" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="logo-texts">
+        <span class="logo-name">次元共生</span>
+        <span class="logo-sub">Dimensional Symbiosis</span>
+      </div>
+    </div>
+    <nav>
+      <a href="#" class="active">首页</a>
+      <a href="#">模型广场</a>
+      <a href="#">企业治理</a>
+      <a href="#">推荐计划</a>
+      <a href="#">说明文档</a>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main>
+    <div class="main-grid">
+      <div class="left-col">
+        <div class="heading-wrap">
+          <h1 class="main-h1 c-fade" id="heading">
+            <span id="title-line">聚合主流大模型</span><br>
+            <span class="accent" id="accent-line">构建企业级 Ai</span>
+          </h1>
+          <p class="main-subtitle c-fade" id="subtitle-text">用量治理体系</p>
+        </div>
+
+        <div>
+          <div class="cold-flow">
+            <div class="cli-inner">
+              <svg class="term-icon" viewBox="0 0 24 24">
+                <polyline points="4 17 10 11 4 5"/>
+                <line x1="12" y1="19" x2="20" y2="19"/>
+              </svg>
+              <span class="cli-badge">CLI</span>
+              <span class="cli-command">npx @model-go/cli@latest install</span>
+              <button class="copy-btn" id="copyBtn" onclick="doCopy()">
+                <svg id="copyIcon" viewBox="0 0 24 24">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                <span id="copyTxt">COPY</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="purple-line"></div>
+      </div>
+
+      <div class="right-col">
+        <div class="steps">
+          <button class="step-btn active" data-id="strategy" onclick="setStep('strategy')">
+            <span class="step-num">01</span>
+            <span class="step-label">Strategy</span>
+          </button>
+          <div class="step-div"></div>
+          <button class="step-btn" data-id="design" onclick="setStep('design')">
+            <span class="step-num">02</span>
+            <span class="step-label">Design</span>
+          </button>
+          <div class="step-div"></div>
+          <button class="step-btn" data-id="build" onclick="setStep('build')">
+            <span class="step-num">03</span>
+            <span class="step-label">Build</span>
+          </button>
+          <div class="step-div"></div>
+          <button class="step-btn" data-id="scale" onclick="setStep('scale')">
+            <span class="step-num">04</span>
+            <span class="step-label">Scale</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="foot-left">
+      <div class="foot-copy">
+        <p>Scalable solutions</p>
+        <p>for the modern era</p>
+      </div>
+      <div class="foot-badges">
+        <span>Secure</span>
+        <span class="foot-dot">•</span>
+        <span>Reliable</span>
+        <span class="foot-dot">•</span>
+        <span>Future-ready</span>
+      </div>
+    </div>
+    <div class="foot-right">
+      <button class="foot-key">KEYS</button>
+      <button class="foot-scan">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+          <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+          <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+          <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+          <rect x="8" y="8" width="8" height="8" rx="1.5"/>
+        </svg>
+      </button>
+    </div>
+  </footer>
+</div>
+
+<script>
+const CONTENT = {
+  strategy: { title: '聚合主流大模型',      accent: '构建企业级 Ai',         sub: '用量治理体系' },
+  design:   { title: '智能路由与分发',      accent: '降低企业算力底座耗损',   sub: '全链路监控评估大模型吞吐与响应开销，智能调节负载' },
+  build:    { title: '用量精准度量与计费',  accent: '实现全面颗粒度账单剖析', sub: '精细多维度的企业模型用量，保障每一笔算力清晰透明' },
+  scale:    { title: '混合云安全隔离',      accent: '构筑可信的企业数据防火墙', sub: '完全解耦公有云接口接入，并支持私有模型集群的轻量治理' },
+};
+
+let current = 'strategy';
+
+function setStep(id) {
+  if (id === current) return;
+  const h = document.getElementById('heading');
+  const s = document.getElementById('subtitle-text');
+  h.classList.add('out');
+  s.classList.add('out');
+  document.querySelectorAll('.step-btn').forEach(el => el.classList.toggle('active', el.dataset.id === id));
+  setTimeout(() => {
+    const c = CONTENT[id];
+    document.getElementById('title-line').textContent = c.title;
+    document.getElementById('accent-line').textContent = c.accent;
+    s.textContent = c.sub;
+    h.classList.remove('out');
+    s.classList.remove('out');
+    current = id;
+  }, 380);
+}
+
+function doCopy() {
+  navigator.clipboard.writeText('npx @model-go/cli@latest install').catch(() => {});
+  const btn  = document.getElementById('copyBtn');
+  const icon = document.getElementById('copyIcon');
+  const txt  = document.getElementById('copyTxt');
+  btn.classList.add('done');
+  icon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+  txt.textContent = 'COPIED';
+  setTimeout(() => {
+    btn.classList.remove('done');
+    icon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>';
+    txt.textContent = 'COPY';
+  }, 2000);
+}
+</script>
+</body>
+</html>

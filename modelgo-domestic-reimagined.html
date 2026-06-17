@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>聚合主流大模型，构建企业级 Ai 用量治理体系</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --mg-bg: #070b20;
+      --mg-text-primary: rgba(246, 248, 255, 0.88);
+      --mg-text-secondary: rgba(226, 231, 255, 0.58);
+      --mg-text-muted: rgba(219, 224, 255, 0.38);
+      --mg-line-soft: rgba(184, 197, 255, 0.11);
+      --mg-line-bright: rgba(222, 228, 255, 0.24);
+      --mg-purple: #9d4dff;
+      --mg-pink: #ef5be0;
+      --mg-blue: #426bff;
+      --stage-a: 157, 77, 255;
+      --stage-b: 239, 91, 224;
+      --stage-c: 66, 107, 255;
+      --hot-x: 58%;
+      --hot-y: 46%;
+      --energy: 1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      background: var(--mg-bg);
+      color: var(--mg-text-primary);
+      overflow: hidden;
+      font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-height: 760px;
+      overflow: hidden;
+      isolation: isolate;
+      background:
+        radial-gradient(circle at var(--hot-x) var(--hot-y), rgba(var(--stage-b), calc(0.26 * var(--energy))), transparent 25%),
+        radial-gradient(circle at 59% 48%, rgba(var(--stage-b), 0.50), transparent 33%),
+        radial-gradient(circle at 42% 49%, rgba(var(--stage-a), 0.46), transparent 46%),
+        radial-gradient(circle at 70% 89%, rgba(var(--stage-c), 0.38), transparent 35%),
+        radial-gradient(circle at 18% 80%, rgba(239, 91, 224, 0.22), transparent 35%),
+        linear-gradient(125deg, #070b20 0%, #151858 32%, #4a21a9 62%, #180f49 100%);
+      background-size: 120% 120%, 118% 118%, 126% 126%, 122% 122%, 116% 116%, 100% 100%;
+      animation: fieldPulse 8s ease-in-out infinite alternate;
+    }
+
+    .aurora,
+    .cursor-glow,
+    .mesh,
+    .mist,
+    .scanner,
+    .grid,
+    .grain,
+    .vignette,
+    .corner,
+    canvas {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    canvas {
+      inset: 0;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      mix-blend-mode: screen;
+      opacity: 0.84;
+    }
+
+    .aurora {
+      inset: -18%;
+      z-index: 1;
+      background:
+        conic-gradient(from 126deg at 51% 48%, transparent 0deg, rgba(var(--stage-c), 0.25) 72deg, rgba(var(--stage-a), 0.52) 144deg, rgba(var(--stage-b), 0.42) 214deg, rgba(var(--stage-c), 0.28) 302deg, transparent 360deg);
+      filter: blur(78px);
+      opacity: 0.86;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      animation: auroraDrift 11s ease-in-out infinite alternate;
+    }
+
+    .cursor-glow {
+      left: var(--hot-x);
+      top: var(--hot-y);
+      z-index: 2;
+      width: min(42vw, 680px);
+      height: min(42vw, 680px);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(var(--stage-b), 0.30) 18%, rgba(var(--stage-a), 0.14) 42%, transparent 72%);
+      filter: blur(34px);
+      mix-blend-mode: screen;
+      opacity: calc(0.58 * var(--energy));
+      transform: translate3d(-50%, -50%, 0) scale(1);
+      transition: left 160ms ease-out, top 160ms ease-out, opacity 220ms ease;
+      animation: cursorGlowBreath 3.4s ease-in-out infinite alternate;
+    }
+
+    .mesh {
+      inset: 9% -10% auto -8%;
+      z-index: 2;
+      height: 64%;
+      background:
+        linear-gradient(108deg, transparent 0%, rgba(var(--stage-c), 0.20) 24%, rgba(var(--stage-a), 0.58) 52%, rgba(var(--stage-b), 0.32) 72%, transparent 100%);
+      filter: blur(42px);
+      opacity: 0.72;
+      animation: meshSweep 9s ease-in-out infinite alternate;
+    }
+
+    .mist {
+      inset: auto -15% -19% -12%;
+      z-index: 2;
+      height: 42%;
+      background:
+        radial-gradient(ellipse at 54% 0%, rgba(var(--stage-a), 0.50), transparent 56%),
+        radial-gradient(ellipse at 74% 34%, rgba(var(--stage-c), 0.38), transparent 52%);
+      filter: blur(52px);
+      opacity: 0.58;
+      animation: mistLift 10s ease-in-out infinite alternate;
+    }
+
+    .scanner {
+      top: -22%;
+      left: -36%;
+      z-index: 6;
+      width: 42%;
+      height: 152%;
+      background:
+        linear-gradient(90deg, transparent 0%, rgba(var(--stage-a), 0) 28%, rgba(255, 255, 255, 0.14) 48%, rgba(var(--stage-b), 0.23) 54%, transparent 76%);
+      filter: blur(24px);
+      opacity: 0.64;
+      transform: rotate(18deg);
+      animation: scannerTravel 7s ease-in-out infinite;
+    }
+
+    .grid {
+      inset: 0;
+      z-index: 4;
+      background-image:
+        linear-gradient(rgba(229, 232, 255, 0.056) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(229, 232, 255, 0.048) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.78) 0%, black 12%, black 86%, transparent 100%);
+      opacity: 0.78;
+      animation: gridFloat 18s linear infinite;
+      transform: translate3d(calc(var(--mx, 0) * -0.16), calc(var(--my, 0) * -0.16), 0);
+    }
+
+    .grid::before {
+      position: absolute;
+      inset: 0;
+      content: "";
+      background-image:
+        radial-gradient(circle, rgba(255, 255, 255, 0.18) 0 1px, transparent 1.6px),
+        radial-gradient(circle, rgba(255, 255, 255, 0.15) 0 1px, transparent 1.6px);
+      background-size: 240px 240px, 420px 420px;
+      background-position: 48px 18px, 182px 112px;
+      opacity: 0.36;
+      animation: starBlink 4s ease-in-out infinite alternate;
+    }
+
+    .corner {
+      z-index: 5;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background:
+        radial-gradient(circle at 58% 78%, rgba(250, 213, 255, 0.76), rgba(160, 72, 255, 0.66) 35%, rgba(71, 64, 197, 0.25) 68%, transparent 87%);
+      box-shadow:
+        inset 0 0 44px rgba(255, 255, 255, 0.24),
+        0 0 68px rgba(var(--stage-a), 0.66),
+        0 0 160px rgba(var(--stage-c), 0.34);
+      filter: saturate(1.18) blur(0.2px);
+      transform: translate3d(calc(var(--mx, 0) * -0.45), calc(var(--my, 0) * -0.45), 0);
+    }
+
+    .corner::after {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      content: "";
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 30%),
+        radial-gradient(circle at 60% 76%, rgba(255, 255, 255, 0.28), transparent 38%);
+      mix-blend-mode: screen;
+      opacity: 0.58;
+    }
+
+    .corner-top-left {
+      top: -39vh;
+      left: -6vw;
+      width: 32vw;
+      height: 55vh;
+      border-radius: 0 0 42% 0;
+      animation: cornerA 8s ease-in-out infinite alternate;
+    }
+
+    .corner-top-right {
+      top: 8vh;
+      right: -7vw;
+      width: 28vw;
+      height: 24vh;
+      border-radius: 0 0 0 48%;
+      background:
+        radial-gradient(circle at 17% 58%, rgba(255, 206, 251, 0.82), rgba(237, 75, 223, 0.58) 36%, rgba(92, 44, 186, 0.28) 72%, transparent 90%);
+      animation: cornerB 9s ease-in-out infinite alternate;
+    }
+
+    .corner-bottom-left {
+      bottom: -31vh;
+      left: -9vw;
+      width: 39vw;
+      height: 36vh;
+      border-radius: 0 42% 0 0;
+      background:
+        radial-gradient(circle at 72% 8%, rgba(255, 185, 243, 0.76), rgba(203, 73, 224, 0.56) 39%, rgba(66, 55, 163, 0.22) 78%, transparent 90%);
+      animation: cornerC 10s ease-in-out infinite alternate;
+    }
+
+    .corner-bottom-right {
+      right: -8vw;
+      bottom: -22vh;
+      width: 50vw;
+      height: 37vh;
+      border-radius: 42% 0 0 0;
+      background:
+        radial-gradient(circle at 16% 14%, rgba(207, 218, 255, 0.90), rgba(58, 125, 255, 0.64) 35%, rgba(77, 68, 215, 0.30) 70%, transparent 87%);
+      animation: cornerD 8.5s ease-in-out infinite alternate;
+    }
+
+    .vignette {
+      inset: 0;
+      z-index: 7;
+      background:
+        radial-gradient(circle at 55% 49%, transparent 0 40%, rgba(7, 11, 32, 0.26) 72%, rgba(4, 7, 20, 0.88) 100%),
+        linear-gradient(90deg, rgba(5, 8, 23, 0.58) 0%, transparent 32%, rgba(5, 8, 23, 0.18) 68%, rgba(5, 8, 23, 0.54) 100%),
+        linear-gradient(180deg, rgba(5, 8, 23, 0.12) 0%, transparent 48%, rgba(5, 8, 23, 0.62) 100%);
+    }
+
+    .grain {
+      inset: 0;
+      z-index: 8;
+      opacity: 0.075;
+      mix-blend-mode: screen;
+      background-image:
+        radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.9) 0 1px, transparent 1.2px),
+        radial-gradient(circle at 72% 64%, rgba(255, 255, 255, 0.75) 0 1px, transparent 1.2px);
+      background-size: 7px 7px, 11px 11px;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      width: 100%;
+      height: 100%;
+      padding: clamp(58px, 7.1vw, 146px);
+      padding-top: clamp(76px, 9.5vw, 126px);
+      gap: clamp(40px, 5vw, 90px);
+    }
+
+    .brand-mark {
+      position: absolute;
+      top: clamp(30px, 4.2vw, 58px);
+      left: clamp(42px, 7.1vw, 136px);
+      z-index: 12;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: rgba(245, 248, 255, 0.82);
+    }
+
+    .brand-logo {
+      width: clamp(42px, 3.2vw, 58px);
+      height: auto;
+      display: block;
+      filter:
+        drop-shadow(0 0 18px rgba(var(--stage-a), 0.34))
+        drop-shadow(0 10px 28px rgba(4, 8, 32, 0.35));
+    }
+
+    .brand-name {
+      font-size: clamp(15px, 1vw, 18px);
+      font-weight: 650;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-sub {
+      display: block;
+      margin-top: 3px;
+      color: rgba(226, 231, 255, 0.40);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .hero-copy {
+      align-self: center;
+      max-width: 780px;
+      transform: translateY(8.5vh);
+    }
+
+    .hero-title {
+      margin: 0;
+      color: var(--mg-text-primary);
+      font-size: clamp(58px, 5.15vw, 106px);
+      font-weight: 500;
+      line-height: 0.99;
+      letter-spacing: 0;
+      text-shadow:
+        0 16px 78px rgba(51, 91, 255, 0.32),
+        0 0 22px rgba(219, 117, 255, 0.18);
+    }
+
+    .hero-title span {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .hero-subtitle {
+      max-width: 650px;
+      margin: 30px 0 0;
+      color: var(--mg-text-secondary);
+      font-size: clamp(19px, 1.55vw, 29px);
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .accent-line {
+      width: 74px;
+      height: 3px;
+      margin-top: 45px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--mg-purple), rgba(157, 77, 255, 0));
+      box-shadow: 0 0 28px rgba(var(--stage-a), 0.78);
+      transform-origin: left center;
+      animation: lineBreath 2.8s ease-in-out infinite alternate;
+    }
+
+    .caption {
+      position: absolute;
+      left: clamp(58px, 7.1vw, 146px);
+      bottom: clamp(64px, 8.1vw, 126px);
+      z-index: 10;
+      width: min(360px, 46vw);
+      color: var(--mg-text-muted);
+      font-size: clamp(16px, 1.05vw, 22px);
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .caption strong {
+      display: block;
+      margin-bottom: 20px;
+      color: rgba(229, 232, 255, 0.43);
+      font-weight: 600;
+    }
+
+    .caption span {
+      color: rgba(229, 232, 255, 0.34);
+      font-size: 0.86em;
+      letter-spacing: 0.01em;
+    }
+
+    .stage-nav {
+      align-self: center;
+      justify-self: end;
+      width: 174px;
+      margin-top: 11vh;
+    }
+
+    .stage-item {
+      display: block;
+      width: 100%;
+      padding: 0 0 27px;
+      margin: 0 0 29px;
+      border: 0;
+      border-bottom: 1px solid var(--mg-line-soft);
+      background: transparent;
+      color: rgba(227, 219, 255, 0.50);
+      text-align: left;
+      cursor: pointer;
+      transition: color 220ms ease, transform 220ms ease, border-color 220ms ease;
+    }
+
+    .stage-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .stage-item:hover,
+    .stage-item:focus-visible,
+    .stage-item.is-active {
+      color: rgba(239, 221, 255, 0.86);
+      border-color: var(--mg-line-bright);
+      outline: none;
+      transform: translateX(-8px);
+    }
+
+    .stage-index {
+      display: block;
+      margin-bottom: 13px;
+      color: var(--mg-purple);
+      font-size: clamp(28px, 2vw, 39px);
+      font-weight: 700;
+      line-height: 1;
+      text-shadow: 0 0 24px rgba(var(--stage-a), 0.68);
+    }
+
+    .stage-label {
+      display: block;
+      color: currentColor;
+      font-size: clamp(14px, 1vw, 18px);
+      font-weight: 600;
+    }
+
+    @keyframes fieldPulse {
+      0% { background-position: 59% 48%, 42% 49%, 70% 89%, 18% 80%, 0 0; filter: saturate(1) brightness(1); }
+      100% { background-position: 65% 43%, 37% 53%, 63% 83%, 24% 84%, 0 0; filter: saturate(1.13) brightness(1.05); }
+    }
+
+    @keyframes auroraDrift {
+      0% { filter: blur(78px); opacity: 0.78; }
+      100% { filter: blur(68px); opacity: 0.98; }
+    }
+
+    @keyframes cursorGlowBreath {
+      0% { transform: translate3d(-50%, -50%, 0) scale(0.86); }
+      100% { transform: translate3d(-50%, -50%, 0) scale(1.08); }
+    }
+
+    @keyframes meshSweep {
+      0% { transform: translate3d(-8%, -4%, 0) rotate(-4deg); opacity: 0.56; }
+      100% { transform: translate3d(10%, 6%, 0) rotate(4deg); opacity: 0.88; }
+    }
+
+    @keyframes mistLift {
+      0% { transform: translate3d(0, 4%, 0); opacity: 0.44; }
+      100% { transform: translate3d(-3%, -6%, 0); opacity: 0.68; }
+    }
+
+    @keyframes scannerTravel {
+      0% { transform: translate3d(-18vw, 0, 0) rotate(18deg); opacity: 0; }
+      16% { opacity: 0.58; }
+      64% { opacity: 0.42; }
+      100% { transform: translate3d(160vw, 0, 0) rotate(18deg); opacity: 0; }
+    }
+
+    @keyframes gridFloat {
+      0% { background-position: 0 0, 0 0; }
+      100% { background-position: 80px 80px, 80px 80px; }
+    }
+
+    @keyframes starBlink {
+      0% { opacity: 0.18; transform: translateY(0); }
+      100% { opacity: 0.42; transform: translateY(-16px); }
+    }
+
+    @keyframes lineBreath {
+      0% { transform: scaleX(0.86); opacity: 0.72; }
+      100% { transform: scaleX(1.14); opacity: 1; }
+    }
+
+    @keyframes cornerA { 100% { translate: -2.2vw 2.4vh; scale: 1.07; } }
+    @keyframes cornerB { 100% { translate: 3vw -2vh; scale: 1.08; } }
+    @keyframes cornerC { 100% { translate: 3.4vw -2.4vh; scale: 1.08; } }
+    @keyframes cornerD { 100% { translate: -3.2vw -3vh; scale: 1.10; } }
+
+    @media (max-width: 920px) {
+      .page {
+        min-height: 760px;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+        min-width: 0;
+        padding: 82px 28px 32px;
+      }
+
+      .hero-copy {
+        align-self: start;
+        width: calc(100vw - 56px);
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        transform: translateY(18vh);
+      }
+
+      .brand-mark {
+        top: 28px;
+        left: 28px;
+        gap: 10px;
+      }
+
+      .brand-logo {
+        width: 38px;
+      }
+
+      .brand-name {
+        font-size: 14px;
+      }
+
+      .brand-sub {
+        display: none;
+      }
+
+      .hero-title {
+        width: 100%;
+        font-size: clamp(34px, 9.2vw, 36px);
+        line-height: 1.08;
+      }
+
+      .stage-nav {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 32px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-self: auto;
+        width: auto;
+        gap: 10px 16px;
+        margin: 0;
+      }
+
+      .stage-item {
+        padding-bottom: 8px;
+        margin: 0;
+        min-width: 0;
+      }
+
+      .stage-item:hover,
+      .stage-item:focus-visible,
+      .stage-item.is-active {
+        transform: translateY(-4px);
+      }
+
+      .stage-index {
+        font-size: clamp(26px, 7.5vw, 32px);
+      }
+
+      .stage-label {
+        overflow: hidden;
+        max-width: 100%;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .caption {
+        left: 28px;
+        right: 28px;
+        bottom: 178px;
+        width: auto;
+      }
+
+      .corner-top-left {
+        width: 68vw;
+      }
+
+      .corner-top-right {
+        width: 54vw;
+      }
+
+      .corner-bottom-right {
+        width: 86vw;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page" aria-label="ModelGo 国内官网首屏">
+    <canvas id="motionField" aria-hidden="true"></canvas>
+    <div class="aurora"></div>
+    <div class="cursor-glow"></div>
+    <div class="mesh"></div>
+    <div class="mist"></div>
+    <div class="scanner"></div>
+    <div class="corner corner-top-left"></div>
+    <div class="corner corner-top-right"></div>
+    <div class="corner corner-bottom-left"></div>
+    <div class="corner corner-bottom-right"></div>
+    <div class="grid"></div>
+    <div class="vignette"></div>
+    <div class="grain"></div>
+
+    <a class="brand-mark" href="./modelgo-domestic-reimagined.html" aria-label="ModelGo 首页">
+      <img class="brand-logo" src="./assets/logo-cn.svg" alt="ModelGo" />
+      <span>
+        <span class="brand-name">ModelGo</span>
+        <span class="brand-sub">AI Gateway</span>
+      </span>
+    </a>
+
+    <section class="content">
+      <div class="hero-copy">
+        <h1 class="hero-title" id="heroTitle">
+          <span>聚合主流大模型</span>
+          <span>构建企业级 Ai</span>
+          <span>用量治理体系</span>
+        </h1>
+        <p class="hero-subtitle" id="heroSubtitle">统一接入主流大模型，让团队用一个入口完成调用、计费、监控与治理。</p>
+        <div class="accent-line"></div>
+      </div>
+
+      <nav class="stage-nav" aria-label="ModelGo 核心能力">
+        <button class="stage-item is-active" type="button" data-title="聚合主流大模型|构建企业级 Ai|用量治理体系" data-subtitle="统一接入主流大模型，让团队用一个入口完成调用、计费、监控与治理。">
+          <span class="stage-index">01</span>
+          <span class="stage-label">Access</span>
+        </button>
+        <button class="stage-item" type="button" data-title="能力编排|一次完成" data-subtitle="把模型、知识库、工具和业务流程组织成稳定链路，从试用快速走到生产。">
+          <span class="stage-index">02</span>
+          <span class="stage-label">Orchestrate</span>
+        </button>
+        <button class="stage-item" type="button" data-title="用量成本|实时可见" data-subtitle="按项目、模型和成员追踪调用质量与成本，问题发生前就能看见趋势。">
+          <span class="stage-index">03</span>
+          <span class="stage-label">Observe</span>
+        </button>
+        <button class="stage-item" type="button" data-title="企业治理|持续增长" data-subtitle="统一 Key、权限、审计和策略，让 AI 能力在组织内安全扩展。">
+          <span class="stage-index">04</span>
+          <span class="stage-label">Govern</span>
+        </button>
+      </nav>
+    </section>
+
+    <aside class="caption" aria-live="polite">
+      <strong id="captionTitle">面向现代企业的 AI 基础设施</strong>
+      <span id="captionMeta">稳定接入 · 成本可控 · 治理就绪</span>
+    </aside>
+  </main>
+
+  <script>
+    const root = document.querySelector('.page')
+    const canvas = document.getElementById('motionField')
+    const context = canvas.getContext('2d')
+    const title = document.getElementById('heroTitle')
+    const subtitle = document.getElementById('heroSubtitle')
+    const captionTitle = document.getElementById('captionTitle')
+    const captionMeta = document.getElementById('captionMeta')
+    const stageItems = Array.from(document.querySelectorAll('.stage-item'))
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const state = {
+      width: 0,
+      height: 0,
+      dpr: 1,
+      particles: [],
+      pulses: [],
+      pointer: { x: 0.58, y: 0.46, tx: 0.58, ty: 0.46 },
+      stage: 0,
+      energy: 1,
+    }
+
+    const captions = [
+      ['面向现代企业的 AI 基础设施', '稳定接入 · 成本可控 · 治理就绪'],
+      ['从模型能力到业务流程', '多模型 · 多场景 · 可复用链路'],
+      ['每一次调用都有上下文', '延迟 · 成本 · 成功率 · 告警'],
+      ['组织级 AI 能力平台', '权限 · 审计 · 策略 · 扩展'],
+    ]
+
+    const palettes = [
+      { a: [157, 77, 255], b: [239, 91, 224], c: [66, 107, 255], energy: 1.02 },
+      { a: [107, 92, 255], b: [76, 201, 240], c: [170, 83, 255], energy: 0.92 },
+      { a: [116, 96, 255], b: [255, 93, 203], c: [80, 155, 255], energy: 1.14 },
+      { a: [199, 89, 255], b: [105, 132, 255], c: [255, 111, 216], energy: 1.0 },
+    ]
+
+    function color(values, alpha) {
+      return `rgba(${values[0]}, ${values[1]}, ${values[2]}, ${alpha})`
+    }
+
+    function applyPalette(index) {
+      const palette = palettes[index]
+      root.style.setProperty('--stage-a', palette.a.join(', '))
+      root.style.setProperty('--stage-b', palette.b.join(', '))
+      root.style.setProperty('--stage-c', palette.c.join(', '))
+      root.style.setProperty('--energy', palette.energy)
+      state.stage = index
+      state.energy = palette.energy
+    }
+
+    function resizeCanvas() {
+      state.dpr = Math.min(window.devicePixelRatio || 1, 2)
+      state.width = window.innerWidth
+      state.height = window.innerHeight
+      canvas.width = Math.floor(state.width * state.dpr)
+      canvas.height = Math.floor(state.height * state.dpr)
+      context.setTransform(state.dpr, 0, 0, state.dpr, 0, 0)
+    }
+
+    function seedParticles() {
+      const count = state.width < 700 ? 44 : 72
+      state.particles = Array.from({ length: count }, (_, index) => {
+        const layer = index % 3
+        return {
+          x: Math.random() * state.width,
+          y: Math.random() * state.height,
+          radius: 0.55 + Math.random() * (layer === 0 ? 1.5 : 1.05),
+          speedX: 0.035 + Math.random() * 0.16 + layer * 0.012,
+          speedY: -0.07 + Math.random() * 0.15,
+          phase: Math.random() * Math.PI * 2,
+          layer,
+          link: Math.random() > 0.54,
+        }
+      })
+    }
+
+    function draw(time = 0) {
+      const palette = palettes[state.stage]
+      state.pointer.x += (state.pointer.tx - state.pointer.x) * 0.055
+      state.pointer.y += (state.pointer.ty - state.pointer.y) * 0.055
+
+      context.clearRect(0, 0, state.width, state.height)
+      context.globalCompositeOperation = 'screen'
+
+      const pointerX = state.pointer.x * state.width
+      const pointerY = state.pointer.y * state.height
+      const glow = context.createRadialGradient(pointerX, pointerY, 0, pointerX, pointerY, Math.max(state.width, state.height) * 0.38)
+      glow.addColorStop(0, color(palette.b, 0.28 * state.energy))
+      glow.addColorStop(0.28, color(palette.a, 0.14 * state.energy))
+      glow.addColorStop(1, 'rgba(0, 0, 0, 0)')
+      context.fillStyle = glow
+      context.fillRect(0, 0, state.width, state.height)
+
+      for (let ribbon = 0; ribbon < 5; ribbon += 1) {
+        const yBase = state.height * (0.24 + ribbon * 0.13) + (state.pointer.y - 0.5) * 46
+        const gradient = context.createLinearGradient(0, 0, state.width, 0)
+        gradient.addColorStop(0, color(palette.c, 0))
+        gradient.addColorStop(0.30, color(palette.c, 0.08 * state.energy))
+        gradient.addColorStop(0.56, color(palette.a, 0.15 * state.energy))
+        gradient.addColorStop(0.78, color(palette.b, 0.10 * state.energy))
+        gradient.addColorStop(1, color(palette.b, 0))
+        context.beginPath()
+        for (let x = -80; x <= state.width + 80; x += 30) {
+          const y = yBase
+            + Math.sin(x * 0.006 + time * 0.00032 + ribbon + state.stage * 0.54) * (32 + ribbon * 8)
+            + Math.cos(x * 0.003 + time * 0.00046 + state.pointer.x * 2) * 18
+          if (x === -80) context.moveTo(x, y)
+          else context.lineTo(x, y)
+        }
+        context.strokeStyle = gradient
+        context.lineWidth = 1.4 + ribbon * 0.12
+        context.shadowColor = color(palette.a, 0.30)
+        context.shadowBlur = 34
+        context.stroke()
+      }
+
+      state.particles.forEach((particle) => {
+        particle.x += particle.speedX
+        particle.y += particle.speedY + Math.sin(time * 0.001 + particle.phase) * 0.08
+        if (particle.x > state.width + 20) particle.x = -20
+        if (particle.y < -20) particle.y = state.height + 20
+        if (particle.y > state.height + 20) particle.y = -20
+
+        const alpha = 0.08 + Math.sin(time * 0.0015 + particle.phase) * 0.06
+        const particleColor = particle.layer === 0
+          ? color(palette.c, alpha)
+          : particle.layer === 1
+            ? color(palette.a, alpha)
+            : color(palette.b, alpha)
+        context.beginPath()
+        context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
+        context.fillStyle = particleColor
+        context.shadowColor = particleColor
+        context.shadowBlur = 12
+        context.fill()
+      })
+
+      context.shadowBlur = 0
+      for (let i = 0; i < state.particles.length; i += 1) {
+        const particle = state.particles[i]
+        if (!particle.link) continue
+        const dx = particle.x - pointerX
+        const dy = particle.y - pointerY
+        const distance = Math.hypot(dx, dy)
+        const maxDistance = Math.min(state.width, state.height) * 0.22
+        if (distance < maxDistance) {
+          context.beginPath()
+          context.moveTo(particle.x, particle.y)
+          context.lineTo(pointerX, pointerY)
+          context.strokeStyle = color(palette.a, (1 - distance / maxDistance) * 0.10)
+          context.lineWidth = 1
+          context.stroke()
+        }
+      }
+
+      state.pulses = state.pulses
+        .map((pulse) => ({ ...pulse, radius: pulse.radius + pulse.speed, alpha: pulse.alpha * 0.965 }))
+        .filter((pulse) => pulse.alpha > 0.015)
+
+      state.pulses.forEach((pulse) => {
+        context.beginPath()
+        context.arc(pulse.x, pulse.y, pulse.radius, 0, Math.PI * 2)
+        context.strokeStyle = color(palette.b, pulse.alpha)
+        context.lineWidth = 1.4
+        context.shadowColor = color(palette.b, pulse.alpha)
+        context.shadowBlur = 18
+        context.stroke()
+      })
+
+      context.shadowBlur = 0
+      if (!reducedMotion) requestAnimationFrame(draw)
+    }
+
+    function activateStage(nextIndex) {
+      stageItems.forEach((item, index) => item.classList.toggle('is-active', index === nextIndex))
+      const lines = stageItems[nextIndex].dataset.title.split('|')
+      title.innerHTML = lines.map((line) => `<span>${line}</span>`).join('')
+      subtitle.textContent = stageItems[nextIndex].dataset.subtitle
+      captionTitle.textContent = captions[nextIndex][0]
+      captionMeta.textContent = captions[nextIndex][1]
+      applyPalette(nextIndex)
+      state.pulses = [
+        ...state.pulses,
+        {
+          x: state.pointer.x * state.width,
+          y: state.pointer.y * state.height,
+          radius: 20,
+          speed: 7,
+          alpha: 0.34,
+        },
+      ]
+    }
+
+    stageItems.forEach((item, index) => {
+      item.addEventListener('click', () => activateStage(index))
+    })
+
+    window.addEventListener('keydown', (event) => {
+      const nextIndex = Number(event.key) - 1
+      if (nextIndex >= 0 && nextIndex < stageItems.length) activateStage(nextIndex)
+    })
+
+    window.addEventListener('pointermove', (event) => {
+      const xRatio = event.clientX / window.innerWidth
+      const yRatio = event.clientY / window.innerHeight
+      state.pointer.tx = xRatio
+      state.pointer.ty = yRatio
+      const x = (xRatio - 0.5) * 30
+      const y = (yRatio - 0.5) * 24
+      root.style.setProperty('--mx', `${x}px`)
+      root.style.setProperty('--my', `${y}px`)
+      root.style.setProperty('--hot-x', `${xRatio * 100}%`)
+      root.style.setProperty('--hot-y', `${yRatio * 100}%`)
+    })
+
+    window.addEventListener('pointerdown', (event) => {
+      state.pulses = [
+        ...state.pulses,
+        {
+          x: event.clientX,
+          y: event.clientY,
+          radius: 14,
+          speed: 8,
+          alpha: 0.40,
+        },
+      ]
+    })
+
+    window.addEventListener('resize', () => {
+      resizeCanvas()
+      seedParticles()
+    })
+
+    applyPalette(0)
+    resizeCanvas()
+    seedParticles()
+    draw(0)
+  </script>
+</body>
+</html>

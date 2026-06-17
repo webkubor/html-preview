@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML Preview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #08080c;
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 56px 8vw;
+  }
+
+  .header {
+    margin-bottom: 36px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 400;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  .header p {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #383838;
+    font-weight: 300;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .list-row {
+    display: grid;
+    grid-template-columns: 8px 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 13px 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: background 0.12s, border-color 0.12s, opacity 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+
+  .list-row:hover {
+    background: #0f0f16;
+    border-color: #1c1c26;
+  }
+
+  .list-row.deleting {
+    opacity: 0;
+    transform: translateX(12px);
+    pointer-events: none;
+  }
+
+  .row-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .row-info {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .row-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #d8d8d8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .row-name:hover {
+    color: #fff;
+  }
+
+  .row-name-input {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    background: #141420;
+    border: 1px solid #7c3aed88;
+    border-radius: 6px;
+    padding: 2px 10px;
+    outline: none;
+    font-family: inherit;
+    min-width: 180px;
+    flex-shrink: 0;
+  }
+
+  .row-file {
+    font-size: 11px;
+    color: #2e2e3a;
+    font-family: 'SF Mono', 'Fira Mono', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .list-row:hover .row-file {
+    color: #3a3a4a;
+  }
+
+  .row-actions {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+
+  .list-row:hover .row-actions {
+    opacity: 1;
+  }
+
+  .row-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.12s;
+  }
+
+  .row-btn svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .row-btn-open { color: #484858; }
+  .row-btn-open:hover { background: #161622; color: #888; }
+
+  .row-btn-delete { color: #3a3a3a; }
+  .row-btn-delete:hover { background: #2a1212; color: #d06060; }
+
+  .empty {
+    color: #222;
+    font-size: 13px;
+    padding: 80px 0;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>HTML Preview</h1>
+  <p>双击名称重命名 · 悬停显示操作</p>
+</div>
+
+<div class="list" id="list"></div>
+
+<script>
+const PAGES = [
+  { file: 'purple-hero.html',                    name: 'AI 用量治理 - 紫色首屏' },
+  { file: 'modelgo-domestic-blue-purple-bg.html', name: 'ModelGo 国内 - 蓝紫背景' },
+  { file: 'modelgo-domestic-hero-motion.html',    name: 'ModelGo 国内 - 首屏动效' },
+  { file: 'modelgo-domestic-reimagined.html',     name: 'ModelGo 国内 - 用量治理首屏' },
+  { file: 'ai-gateway-hero.html',                 name: 'AI 网关 - 聚合主流大模型' },
+  { file: 'business-reimagined.html',             name: '次元共生 - 企业 AI 用量治理' },
+];
+
+const DOT_COLORS = ['#7c3aed', '#3b82f6', '#a855f7', '#6366f1', '#8b5cf6'];
+
+let names   = JSON.parse(localStorage.getItem('html-preview-names')   || '{}');
+let deleted = JSON.parse(localStorage.getItem('html-preview-deleted') || '[]');
+
+function save() {
+  localStorage.setItem('html-preview-names',   JSON.stringify(names));
+  localStorage.setItem('html-preview-deleted', JSON.stringify(deleted));
+}
+
+function visiblePages() {
+  return PAGES.filter(p => !deleted.includes(p.file));
+}
+
+function render() {
+  const list  = document.getElementById('list');
+  const pages = visiblePages();
+  list.innerHTML = '';
+
+  if (!pages.length) {
+    list.innerHTML = '<div class="empty">没有页面</div>';
+    return;
+  }
+
+  pages.forEach((p, i) => {
+    const displayName = names[p.file] || p.name;
+    const color       = DOT_COLORS[i % DOT_COLORS.length];
+
+    const row = document.createElement('div');
+    row.className = 'list-row';
+    row.dataset.file = p.file;
+
+    // dot
+    const dot = document.createElement('div');
+    dot.className = 'row-dot';
+    dot.style.background = color;
+
+    // info
+    const info = document.createElement('div');
+    info.className = 'row-info';
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'row-name';
+    nameEl.textContent = displayName;
+    nameEl.title = '双击重命名';
+    nameEl.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      startRename(nameEl, p.file);
+    });
+
+    const fileEl = document.createElement('div');
+    fileEl.className = 'row-file';
+    fileEl.textContent = p.file;
+
+    info.appendChild(nameEl);
+    info.appendChild(fileEl);
+
+    // actions
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+
+    const openBtn = document.createElement('button');
+    openBtn.className = 'row-btn row-btn-open';
+    openBtn.title = '打开';
+    openBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+    openBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      window.open(p.file);
+    });
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'row-btn row-btn-delete';
+    delBtn.title = '删除';
+    delBtn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`;
+    delBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      deleteRow(row, p.file);
+    });
+
+    actions.appendChild(openBtn);
+    actions.appendChild(delBtn);
+
+    row.appendChild(dot);
+    row.appendChild(info);
+    row.appendChild(actions);
+
+    // click row to open
+    row.addEventListener('click', () => {
+      window.location.href = p.file;
+    });
+
+    list.appendChild(row);
+  });
+}
+
+function startRename(nameEl, file) {
+  const current = names[file] || PAGES.find(p => p.file === file)?.name || '';
+
+  const input = document.createElement('input');
+  input.className = 'row-name-input';
+  input.value = current;
+  nameEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function commit() {
+    const val = input.value.trim();
+    const original = PAGES.find(p => p.file === file)?.name || '';
+    const fresh = document.createElement('div');
+    fresh.className = 'row-name';
+    fresh.title = '双击重命名';
+
+    if (val && val !== original) {
+      names[file] = val;
+    } else if (!val) {
+      delete names[file];
+    }
+    save();
+
+    fresh.textContent = names[file] || original;
+    fresh.addEventListener('dblclick', e => { e.stopPropagation(); startRename(fresh, file); });
+    input.replaceWith(fresh);
+  }
+
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { input.blur(); }
+    if (e.key === 'Escape') {
+      const fresh = document.createElement('div');
+      fresh.className = 'row-name';
+      fresh.title = '双击重命名';
+      fresh.textContent = names[file] || PAGES.find(p => p.file === file)?.name || file;
+      fresh.addEventListener('dblclick', ev => { ev.stopPropagation(); startRename(fresh, file); });
+      input.replaceWith(fresh);
+    }
+  });
+}
+
+function deleteRow(row, file) {
+  row.classList.add('deleting');
+  setTimeout(() => {
+    deleted.push(file);
+    save();
+    row.remove();
+    if (!visiblePages().length) {
+      document.getElementById('list').innerHTML = '<div class="empty">没有页面</div>';
+    }
+  }, 200);
+}
+
+render();
+</script>
+</body>
+</html>
