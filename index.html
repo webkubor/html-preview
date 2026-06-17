@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>栖洲的 UI 集锦 — Pages Gallery</title>
+<title>栖洲的 UI 集锦</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -11,406 +11,141 @@
 
   :root {
     --bg: #0a0a0f;
-    --card-bg: #12121a;
-    --card-border: #1e1e2a;
-    --text-primary: #e8e8f0;
-    --text-secondary: #6a6a7a;
-    --text-tertiary: #3a3a4a;
+    --hover: #14141e;
+    --border: #1e1e2a;
+    --text: #e8e8f0;
+    --muted: #6a6a7a;
   }
 
   body {
     font-family: 'Inter', -apple-system, 'PingFang SC', sans-serif;
     background: var(--bg);
-    color: var(--text-primary);
+    color: var(--text);
     min-height: 100vh;
   }
 
-  /* ── Header ── */
   .header {
-    padding: 64px 8vw 40px;
-    border-bottom: 1px solid var(--card-border);
-  }
-
-  .header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .header-brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 12px;
-  }
-
-  .header-logo {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #7c3aed, #3b82f6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 16px;
-    color: #fff;
-    flex-shrink: 0;
+    padding: 80px 8vw 48px;
   }
 
   .header h1 {
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 600;
     letter-spacing: -0.02em;
-    color: #fff;
   }
 
-  .header-meta {
-    display: flex;
-    gap: 24px;
+  .header p {
     margin-top: 8px;
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 300;
-  }
-
-  .header-meta span {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .header-meta .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-
-  /* ── Grid ── */
-  .grid-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 8vw 80px;
-  }
-
-  .grid-label {
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-tertiary);
-    margin-bottom: 24px;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 20px;
-  }
-
-  /* ── Card ── */
-  .card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-                border-color 0.25s,
-                box-shadow 0.25s;
-    text-decoration: none;
-    color: inherit;
-    display: block;
-  }
-
-  .card:hover {
-    transform: translateY(-4px);
-    border-color: var(--card-accent, #7c3aed);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4),
-                0 0 0 1px var(--card-accent, #7c3aed);
-  }
-
-  /* ── Card Thumbnail ── */
-  .card-thumb {
-    height: 180px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card-thumb-bg {
-    position: absolute;
-    inset: 0;
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .card:hover .card-thumb-bg {
-    transform: scale(1.05);
-  }
-
-  .card-thumb-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.6));
-  }
-
-  .card-thumb-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(8px);
-    color: #ccc;
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .card-thumb-color {
-    position: absolute;
-    bottom: 12px;
-    left: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 10px;
-    font-family: 'JetBrains Mono', monospace;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(8px);
-    color: #ccc;
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .card-thumb-color .swatch {
-    width: 10px;
-    height: 10px;
-    border-radius: 3px;
-    border: 1px solid rgba(255,255,255,0.15);
-  }
-
-  /* ── Card Body ── */
-  .card-body {
-    padding: 16px 18px 18px;
-  }
-
-  .card-title {
-    font-size: 15px;
-    font-weight: 500;
-    color: #fff;
-    margin-bottom: 4px;
-    letter-spacing: -0.01em;
-  }
-
-  .card-subtitle {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-bottom: 14px;
-    line-height: 1.4;
-  }
-
-  .card-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .card-tag {
-    padding: 3px 8px;
-    border-radius: 5px;
-    font-size: 10px;
-    font-weight: 500;
-    background: rgba(255,255,255,0.04);
-    color: var(--text-secondary);
-    border: 1px solid rgba(255,255,255,0.06);
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .card-tag.accent {
-    background: var(--tag-accent-bg, rgba(124,58,237,0.12));
-    color: var(--tag-accent, #7c3aed);
-    border-color: var(--tag-accent-border, rgba(124,58,237,0.25));
-  }
-
-  /* ── Empty State ── */
-  .empty {
-    text-align: center;
-    padding: 100px 0;
-    color: var(--text-tertiary);
     font-size: 14px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
   }
 
-  /* ── Responsive ── */
-  @media (max-width: 768px) {
-    .grid {
-      grid-template-columns: 1fr;
-    }
-    .header { padding: 40px 5vw 30px; }
-    .grid-container { padding: 30px 5vw 60px; }
+  .list {
+    padding: 0 8vw 80px;
+    border-top: 1px solid var(--border);
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s, padding 0.15s;
+  }
+
+  .item:hover {
+    background: var(--hover);
+    padding-left: 12px;
+    padding-right: 12px;
+    margin: 0 -12px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .item-title {
+    font-size: 16px;
+    font-weight: 500;
+    min-width: 200px;
+  }
+
+  .item-sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .item-cat {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .item-arrow {
+    color: var(--muted);
+    font-size: 18px;
+    transition: color 0.15s, transform 0.15s;
+  }
+
+  .item:hover .item-arrow {
+    color: var(--text);
+    transform: translateX(4px);
+  }
+
+  .footer {
+    padding: 0 8vw 48px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
   }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-inner">
-    <div class="header-brand">
-      <div class="header-logo">栖</div>
-      <h1>UI 集锦</h1>
-    </div>
-    <div class="header-meta">
-      <span>栖洲 · 王恩博</span>
-      <span><span class="dot" style="background:#22c55e"></span> 6 个页面</span>
-      <span>AI 生成 · Claude Code</span>
-      <span>2026-06-17</span>
-    </div>
-  </div>
+  <h1>栖洲的 UI 集锦</h1>
+  <p>AI-generated UI experiments</p>
 </div>
 
-<div class="grid-container">
-  <div class="grid-label">Pages Gallery</div>
-  <div class="grid" id="grid"></div>
+<div class="list" id="list"></div>
+
+<div class="footer">
+  Built with Vite · Deployed on Cloudflare Pages
 </div>
 
 <script>
-const PAGES = [
-  {
-    file: 'purple-hero.html',
-    title: 'AI 用量治理',
-    subtitle: '紫色首屏 Hero Section · 粒子光晕动效',
-    accent: '#7c3aed',
-    accent_name: '紫色',
-    bg: '#000000',
-    model: 'Claude Code',
-    date: '2026-06-17',
-    category: 'Hero Section',
-    tech: 'Canvas + CSS Animation',
-    size: '14 KB',
-    thumb_gradient: 'radial-gradient(ellipse at 30% 50%, rgba(124,58,237,0.35) 0%, rgba(124,58,237,0.08) 50%, transparent 80%), radial-gradient(ellipse at 80% 30%, rgba(59,130,246,0.2) 0%, transparent 60%), #000'
-  },
-  {
-    file: 'modelgo-domestic-blue-purple-bg.html',
-    title: 'ModelGo 国内官网',
-    subtitle: '蓝紫粒子背景特效 · WebGL 渲染',
-    accent: '#6366f1',
-    accent_name: '蓝紫',
-    bg: '#000000',
-    model: 'Claude Code',
-    date: '2026-06-17',
-    category: 'Background Effect',
-    tech: 'WebGL + Canvas',
-    size: '11 KB',
-    thumb_gradient: 'radial-gradient(circle at 50% 50%, rgba(99,102,241,0.3) 0%, rgba(99,102,241,0.08) 50%, transparent 80%), #000'
-  },
-  {
-    file: 'modelgo-domestic-hero-motion.html',
-    title: '次元共生',
-    subtitle: '首屏动效 · Space Grotesk 字体系统',
-    accent: '#a855f7',
-    accent_name: '紫蓝',
-    bg: '#04050F',
-    model: 'Claude Code',
-    date: '2026-06-17',
-    category: 'Hero Motion',
-    tech: 'CSS Gradient + Canvas',
-    size: '12 KB',
-    thumb_gradient: 'linear-gradient(135deg, rgba(168,85,247,0.3) 0%, rgba(59,130,246,0.2) 50%, #04050F 100%)'
-  },
-  {
-    file: 'modelgo-domestic-reimagined.html',
-    title: 'AI 用量治理体系',
-    subtitle: '聚合主流大模型 · 企业级完整落地页',
-    accent: '#3b82f6',
-    accent_name: '蓝色',
-    bg: '#070b20',
-    model: 'Claude Code',
-    date: '2026-06-17',
-    category: 'Full Landing',
-    tech: 'Canvas + CSS Animation',
-    size: '29 KB',
-    thumb_gradient: 'radial-gradient(ellipse at 70% 30%, rgba(59,130,246,0.3) 0%, rgba(59,130,246,0.06) 60%, transparent 85%), #070b20'
-  },
-  {
-    file: 'ai-gateway-hero.html',
-    title: 'AI 网关聚合',
-    subtitle: '主流大模型 · 企业级用量治理',
-    accent: '#8b5cf6',
-    accent_name: '蓝紫',
-    bg: '#0a0018',
-    model: 'Claude Code',
-    date: '2026-06-17',
-    category: 'Hero Section',
-    tech: 'CSS Gradient + Canvas',
-    size: '14 KB',
-    thumb_gradient: 'radial-gradient(ellipse at 40% 60%, rgba(139,92,246,0.35) 0%, rgba(139,92,246,0.08) 50%, transparent 80%), #0a0018'
-  },
-  {
-    file: 'business-reimagined.html',
-    title: '次元共生 · 企业版',
-    subtitle: '企业级 AI 用量治理 · 全栈落地页',
-    accent: '#b052ef',
-    accent_name: '紫色',
-    bg: '#090616',
-    model: 'Claude Code',
-    date: '2026-06-17',
-    category: 'Enterprise Landing',
-    tech: 'CSS Animation + Grid',
-    size: '19 KB',
-    thumb_gradient: 'radial-gradient(ellipse at 50% 40%, rgba(176,82,239,0.3) 0%, rgba(176,82,239,0.06) 55%, transparent 80%), #090616'
-  }
-];
+  const pages = [
+    { file: 'purple-hero.html', title: 'AI 用量治理', sub: '紫色首屏 Hero', accent: '#7c3aed', cat: 'Hero' },
+    { file: 'modelgo-domestic-blue-purple-bg.html', title: 'ModelGo 国内官网', sub: '蓝紫粒子背景', accent: '#6366f1', cat: 'Background' },
+    { file: 'modelgo-domestic-hero-motion.html', title: '次元共生', sub: '首屏动效', accent: '#a855f7', cat: 'Motion' },
+    { file: 'modelgo-domestic-reimagined.html', title: 'AI 用量治理体系', sub: '企业级落地页', accent: '#3b82f6', cat: 'Landing' },
+    { file: 'ai-gateway-hero.html', title: 'AI 网关聚合', sub: '主流大模型聚合', accent: '#8b5cf6', cat: 'Hero' },
+    { file: 'business-reimagined.html', title: '次元共生 · 企业版', sub: '企业级 AI 用量治理', accent: '#b052ef', cat: 'Enterprise' },
+  ];
 
-let hidden = JSON.parse(localStorage.getItem('gallery-hidden') || '[]');
-
-function render() {
-  const grid = document.getElementById('grid');
-  const pages = PAGES.filter(p => !hidden.includes(p.file));
-  grid.innerHTML = '';
-
-  if (!pages.length) {
-    grid.innerHTML = '<div class="empty">没有页面</div>';
-    return;
-  }
-
-  pages.forEach(p => {
-    const card = document.createElement('a');
-    card.className = 'card';
-    card.href = p.file;
-    card.style.setProperty('--card-accent', p.accent);
-    card.style.setProperty('--tag-accent', p.accent);
-    card.style.setProperty('--tag-accent-bg', p.accent + '1a');
-    card.style.setProperty('--tag-accent-border', p.accent + '33');
-
-    card.innerHTML = `
-      <div class="card-thumb">
-        <div class="card-thumb-bg" style="background:${p.thumb_gradient}"></div>
-        <div class="card-thumb-overlay"></div>
-        <div class="card-thumb-badge">${p.category}</div>
-        <div class="card-thumb-color">
-          <span class="swatch" style="background:${p.accent}"></span>
-          ${p.accent}
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">${p.title}</div>
-        <div class="card-subtitle">${p.subtitle}</div>
-        <div class="card-tags">
-          <span class="card-tag accent" style="--tag-accent:${p.accent};--tag-accent-bg:${p.accent}1a;--tag-accent-border:${p.accent}33">${p.model}</span>
-          <span class="card-tag">${p.tech}</span>
-          <span class="card-tag">${p.size}</span>
-          <span class="card-tag">${p.date}</span>
-        </div>
-      </div>
-    `;
-
-    grid.appendChild(card);
-  });
-}
-
-render();
+  const list = document.getElementById('list');
+  list.innerHTML = pages.map(p => `
+    <a class="item" href="${p.file}">
+      <span class="dot" style="background:${p.accent}"></span>
+      <span class="item-title">${p.title}</span>
+      <span class="item-sub">${p.sub}</span>
+      <span class="item-cat">${p.cat}</span>
+      <span class="item-arrow">→</span>
+    </a>
+  `).join('');
 </script>
+
 </body>
 </html>
