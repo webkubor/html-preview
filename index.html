@@ -3,149 +3,268 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>栖洲的 UI 集锦</title>
+<title>AI 网关 · 页面预览</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #0a0a0f;
-    --hover: #14141e;
-    --border: #1e1e2a;
-    --text: #e8e8f0;
-    --muted: #6a6a7a;
+    --bg: #07060d;
+    --line: #1a1828;
+    --text: #eceaf5;
+    --muted: #7a7591;
+    --dim: #4a4560;
   }
 
   body {
-    font-family: 'Inter', -apple-system, 'PingFang SC', sans-serif;
+    font-family: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .header {
-    padding: 80px 8vw 48px;
-  }
+  /* ---------- hero ---------- */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+  .hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.5; pointer-events: none; }
+  .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,6,13,0.25) 0%, rgba(7,6,13,0.65) 60%, var(--bg) 100%); pointer-events: none; }
+  .hero-inner { position: relative; z-index: 2; max-width: 1120px; margin: 0 auto; padding: 72px 6vw 56px; }
 
-  .header h1 {
-    font-size: 28px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 999px;
+    border: 1px solid rgba(192,132,252,0.3);
+    background: rgba(124,58,237,0.12);
+    font-size: 12px; color: rgba(236,234,245,0.8);
+    letter-spacing: 0.04em; backdrop-filter: blur(6px);
+    margin-bottom: 22px;
   }
+  .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #c084fc; box-shadow: 0 0 10px #c084fc; }
 
-  .header p {
-    margin-top: 8px;
-    font-size: 14px;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
+  .hero h1 { font-size: clamp(30px, 4vw, 52px); font-weight: 300; line-height: 1.18; letter-spacing: -0.01em; margin-bottom: 14px; }
+  .hero h1 .accent {
+    background: linear-gradient(90deg, #e9d5ff, #c084fc 60%, #a855f7);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 400;
   }
+  .hero p { font-size: 15px; font-weight: 300; color: rgba(236,234,245,0.55); max-width: 560px; line-height: 1.7; }
+  .hero-stats { display: flex; gap: 40px; margin-top: 34px; }
+  .stat .num { font-size: 26px; font-weight: 500; color: #fff; letter-spacing: -0.01em; }
+  .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; letter-spacing: 0.02em; }
 
-  .list {
-    padding: 0 8vw 80px;
-    border-top: 1px solid var(--border);
+  /* ---------- main ---------- */
+  .main { max-width: 1120px; margin: 0 auto; padding: 64px 6vw 96px; }
+  .section { margin-bottom: 56px; }
+  .section:last-child { margin-bottom: 0; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+  .section-title { display: flex; align-items: baseline; gap: 12px; }
+  .section-title h2 { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: 0.01em; }
+  .section-title .count { font-size: 12px; font-weight: 400; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .section-hint { font-size: 11px; color: var(--dim); letter-spacing: 0.06em; text-transform: uppercase; }
+  .group-desc { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; font-weight: 300; }
+
+  /* ---------- row ---------- */
+  .list { display: flex; flex-direction: column; gap: 2px; }
+  .row {
+    position: relative; display: grid;
+    grid-template-columns: 40px 1fr auto; align-items: center; gap: 18px;
+    padding: 14px 16px; border-radius: 10px; cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease; overflow: hidden;
   }
+  .row:hover { background: #110f1c; transform: translateX(3px); }
 
-  .item {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border);
-    text-decoration: none;
-    color: var(--text);
-    transition: background 0.15s, padding 0.15s;
+  .row-bar {
+    width: 40px; height: 40px; border-radius: 9px; flex-shrink: 0;
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--accent-soft), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.06);
   }
-
-  .item:hover {
-    background: var(--hover);
-    padding-left: 12px;
-    padding-right: 12px;
-    margin: 0 -12px;
+  .row-bar::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+    transition: width 0.18s ease;
   }
+  .row:hover .row-bar::before { width: 6px; }
 
-  .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .row-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .row-name { font-size: 14px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
+  .row-name-input { font-size: 14px; font-weight: 500; color: #fff; background: #14131f; border: 1px solid rgba(124,58,237,0.6); border-radius: 6px; padding: 3px 10px; outline: none; font-family: inherit; min-width: 220px; }
+  .row-file { font-size: 11px; color: var(--dim); font-family: 'SF Mono', 'Fira Mono', ui-monospace, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .item-title {
-    font-size: 16px;
-    font-weight: 500;
-    min-width: 200px;
-  }
+  .row-actions { display: flex; gap: 2px; align-items: center; opacity: 0; transform: translateX(6px); transition: opacity 0.18s ease, transform 0.18s ease; flex-shrink: 0; }
+  .row:hover .row-actions { opacity: 1; transform: translateX(0); }
+  .row-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 7px; border: none; cursor: pointer; background: transparent; transition: background 0.14s, color 0.14s; }
+  .row-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .row-btn-open  { color: #56506e; }
+  .row-btn-open:hover  { background: #1a1828; color: #c8c2dc; }
+  .row-btn-delete { color: #463a44; }
+  .row-btn-delete:hover { background: #2a1212; color: #e07070; }
 
-  .item-sub {
-    font-size: 13px;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-  }
+  .empty { color: var(--dim); font-size: 13px; padding: 60px 0; text-align: center; }
 
-  .item-cat {
-    margin-left: auto;
-    font-size: 12px;
-    color: var(--muted);
-    padding: 4px 10px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    white-space: nowrap;
-  }
-
-  .item-arrow {
-    color: var(--muted);
-    font-size: 18px;
-    transition: color 0.15s, transform 0.15s;
-  }
-
-  .item:hover .item-arrow {
-    color: var(--text);
-    transform: translateX(4px);
-  }
-
-  .footer {
-    padding: 0 8vw 48px;
-    font-size: 12px;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
+  @media (max-width: 640px) {
+    .hero-stats { gap: 24px; }
+    .row-actions { opacity: 1; transform: none; }
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>栖洲的 UI 集锦</h1>
-  <p>AI-generated UI experiments</p>
+<div class="hero">
+  <img class="hero-bg" src="hero-concept.svg" alt="">
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="dot"></span>企业级 AI 网关 · 设计预览</div>
+    <h1>
+      聚合主流大模型<br>
+      <span class="accent">构建企业级 AI 用量治理体系</span>
+    </h1>
+    <p>一个网关，接入全球与国内主流大模型。下方为各页面预览入口，点击卡片打开对应设计稿。</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="num" id="statPages">0</div><div class="lbl">预览页面</div></div>
+      <div class="stat"><div class="num" id="statGroups">0</div><div class="lbl">页面分组</div></div>
+      <div class="stat"><div class="num">8</div><div class="lbl">聚合模型</div></div>
+    </div>
+  </div>
 </div>
 
-<div class="list" id="list"></div>
-
-<div class="footer">
-  Built with Vite · Deployed on Cloudflare Pages
-</div>
+<div class="main" id="main"></div>
 
 <script>
-  const pages = [
-    { file: 'purple-hero.html', title: 'AI 用量治理', sub: '紫色首屏 Hero', accent: '#7c3aed', cat: 'Hero' },
-    { file: 'modelgo-domestic-blue-purple-bg.html', title: 'ModelGo 国内官网', sub: '蓝紫粒子背景', accent: '#6366f1', cat: 'Background' },
-    { file: 'modelgo-domestic-hero-motion.html', title: '次元共生', sub: '首屏动效', accent: '#a855f7', cat: 'Motion' },
-    { file: 'modelgo-domestic-reimagined.html', title: 'AI 用量治理体系', sub: '企业级落地页', accent: '#3b82f6', cat: 'Landing' },
-    { file: 'ai-gateway-hero.html', title: 'AI 网关聚合', sub: '主流大模型聚合', accent: '#8b5cf6', cat: 'Hero' },
-    { file: 'business-reimagined.html', title: '次元共生 · 企业版', sub: '企业级 AI 用量治理', accent: '#b052ef', cat: 'Enterprise' },
-  ];
+const PAGES = [
+  { file: 'purple-hero.html',                     name: 'AI 用量治理 · 紫色首屏',       accent: '#a855f7', soft: 'rgba(168,85,247,0.18)' },
+  { file: 'ai-gateway-hero.html',                 name: 'AI 网关 · 聚合主流大模型',      accent: '#c084fc', soft: 'rgba(192,132,252,0.18)' },
+  { file: 'business-reimagined.html',             name: '次元共生 · 企业 AI 用量治理',   accent: '#8b5cf6', soft: 'rgba(139,92,246,0.18)' },
+  { file: 'modelgo-domestic-blue-purple-bg.html', name: 'ModelGo 国内 · 蓝紫背景',       accent: '#6366f1', soft: 'rgba(99,102,241,0.18)' },
+  { file: 'modelgo-domestic-hero-motion.html',    name: 'ModelGo 国内 · 首屏动效',       accent: '#7c3aed', soft: 'rgba(124,58,237,0.18)' },
+  { file: 'modelgo-domestic-reimagined.html',     name: 'ModelGo 国内 · 用量治理首屏',   accent: '#6d28d9', soft: 'rgba(109,40,217,0.18)' },
+];
 
-  const list = document.getElementById('list');
-  list.innerHTML = pages.map(p => `
-    <a class="item" href="${p.file}">
-      <span class="dot" style="background:${p.accent}"></span>
-      <span class="item-title">${p.title}</span>
-      <span class="item-sub">${p.sub}</span>
-      <span class="item-cat">${p.cat}</span>
-      <span class="item-arrow">→</span>
-    </a>
-  `).join('');
+const GROUPS = [
+  { key: 'gateway',    title: 'AI 网关',      desc: '聚合主流大模型的核心网关页与配套设计。' },
+  { key: 'governance', title: 'AI 用量治理',  desc: '企业级 AI 用量与成本治理的首屏设计稿。' },
+  { key: 'modelgo',    title: 'ModelGo 国内', desc: '面向国内场景的用量治理方案，蓝紫渐变与动效探索。' },
+];
+
+function groupKeyOf(p) {
+  const n = p.name;
+  if (n.startsWith('ModelGo'))  return 'modelgo';
+  if (n.startsWith('次元共生')) return 'gateway';
+  if (n.startsWith('AI 网关'))  return 'gateway';
+  return 'governance';
+}
+
+let names   = JSON.parse(localStorage.getItem('html-preview-names')   || '{}');
+let deleted = JSON.parse(localStorage.getItem('html-preview-deleted') || '[]');
+
+function save() {
+  localStorage.setItem('html-preview-names',   JSON.stringify(names));
+  localStorage.setItem('html-preview-deleted', JSON.stringify(deleted));
+}
+function isVisible(p) { return !deleted.includes(p.file); }
+
+function render() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  const totalVisible = PAGES.filter(isVisible).length;
+  document.getElementById('statPages').textContent  = totalVisible;
+  document.getElementById('statGroups').textContent = GROUPS.filter(g => PAGES.some(p => groupKeyOf(p) === g.key && isVisible(p))).length;
+
+  GROUPS.forEach(group => {
+    const pages = PAGES.filter(p => groupKeyOf(p) === group.key && isVisible(p));
+    if (!pages.length) return;
+
+    const sec = document.createElement('section');
+    sec.className = 'section';
+
+    const head = document.createElement('div');
+    head.className = 'section-head';
+    head.innerHTML = '<div class="section-title"><h2>' + group.title + '</h2><span class="count">' + pages.length + ' 个页面</span></div><span class="section-hint">点击打开</span>';
+    sec.appendChild(head);
+
+    const desc = document.createElement('div');
+    desc.className = 'group-desc';
+    desc.textContent = group.desc;
+    sec.appendChild(desc);
+
+    const list = document.createElement('div');
+    list.className = 'list';
+
+    pages.forEach(p => {
+      const displayName = names[p.file] || p.name;
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.style.setProperty('--accent', p.accent);
+      row.style.setProperty('--accent-soft', p.soft);
+      row.dataset.file = p.file;
+
+      row.innerHTML =
+        '<div class="row-bar"></div>' +
+        '<div class="row-info">' +
+          '<div class="row-name" title="双击重命名">' + displayName + '</div>' +
+          '<div class="row-file">' + p.file + '</div>' +
+        '</div>' +
+        '<div class="row-actions">' +
+          '<button class="row-btn row-btn-open" title="新窗口打开"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>' +
+          '<button class="row-btn row-btn-delete" title="移除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+        '</div>';
+
+      row.querySelector('.row-btn-open').addEventListener('click', e => { e.stopPropagation(); window.open(p.file); });
+      row.querySelector('.row-btn-delete').addEventListener('click', e => { e.stopPropagation(); deleteRow(row, p.file); });
+      const nameEl = row.querySelector('.row-name');
+      nameEl.addEventListener('dblclick', e => { e.stopPropagation(); startRename(nameEl, p.file); });
+      row.addEventListener('click', () => { window.location.href = p.file; });
+
+      list.appendChild(row);
+    });
+
+    sec.appendChild(list);
+    main.appendChild(sec);
+  });
+
+  if (!totalVisible) main.innerHTML = '<div class="empty">没有页面</div>';
+}
+
+function startRename(nameEl, file) {
+  const current = names[file] || PAGES.find(p => p.file === file)?.name || '';
+  const input = document.createElement('input');
+  input.className = 'row-name-input';
+  input.value = current;
+  nameEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function restore(text) {
+    const fresh = document.createElement('div');
+    fresh.className = 'row-name';
+    fresh.title = '双击重命名';
+    fresh.textContent = text;
+    fresh.addEventListener('dblclick', e => { e.stopPropagation(); startRename(fresh, file); });
+    input.replaceWith(fresh);
+  }
+  function commit() {
+    const val = input.value.trim();
+    const original = PAGES.find(p => p.file === file)?.name || '';
+    if (val && val !== original) { names[file] = val; }
+    else if (!val) { delete names[file]; }
+    save();
+    restore(names[file] || original);
+  }
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'Escape') restore(names[file] || PAGES.find(p => p.file === file)?.name || file);
+  });
+}
+
+function deleteRow(row, file) {
+  row.style.transition = 'opacity 0.2s, transform 0.2s';
+  row.style.opacity = '0';
+  row.style.transform = 'translateX(12px)';
+  setTimeout(() => { deleted.push(file); save(); render(); }, 200);
+}
+
+render();
 </script>
-
 </body>
 </html>
