@@ -6,10 +6,7 @@ const path = require('path');
 const PAGES = [
   { file: 'purple-hero.html', title: 'AI 用量治理', subtitle: '紫色首屏 Hero', accent: '#7c3aed', model: 'Claude Code', date: '2026-06-17', tech: 'Canvas + Animation' },
   { file: 'ai-gateway-hero.html', title: 'AI 网关聚合', subtitle: '主流大模型聚合', accent: '#8b5cf6', model: 'Claude Code', date: '2026-06-17', tech: 'Gradient + Canvas' },
-  { file: 'modelgo-domestic-hero-motion.html', title: '次元共生', subtitle: '首屏动效', accent: '#a855f7', model: 'Claude Code', date: '2026-06-17', tech: 'Gradient + Canvas' },
-  { file: 'modelgo-domestic-blue-purple-bg.html', title: 'ModelGo 国内官网', subtitle: '蓝紫粒子背景', accent: '#6366f1', model: 'Claude Code', date: '2026-06-17', tech: 'WebGL + Canvas' },
-  { file: 'business-reimagined.html', title: '次元共生 · 企业版', subtitle: '企业级 AI 治理', accent: '#b052ef', model: 'Claude Code', date: '2026-06-17', tech: 'Animation + Grid' },
-  { file: 'modelgo-domestic-reimagined.html', title: 'AI 用量治理体系', subtitle: '企业级落地页', accent: '#3b82f6', model: 'Claude Code', date: '2026-06-17', tech: 'Canvas + Animation' }
+  { file: 'business-reimagined.html', title: '次元共生 · 企业版', subtitle: '企业级 AI 治理', accent: '#b052ef', model: 'Claude Code', date: '2026-06-17', tech: 'Animation + Grid' }
 ];
 
 const distDir = path.join(__dirname, 'dist');

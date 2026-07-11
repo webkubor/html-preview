@@ -1,270 +1,82 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI 网关 · 页面预览</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap');
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --bg: #07060d;
-    --line: #1a1828;
-    --text: #eceaf5;
-    --muted: #7a7591;
-    --dim: #4a4560;
-  }
-
-  body {
-    font-family: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ---------- hero ---------- */
-  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
-  .hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.5; pointer-events: none; }
-  .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,6,13,0.25) 0%, rgba(7,6,13,0.65) 60%, var(--bg) 100%); pointer-events: none; }
-  .hero-inner { position: relative; z-index: 2; max-width: 1120px; margin: 0 auto; padding: 72px 6vw 56px; }
-
-  .hero-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 14px; border-radius: 999px;
-    border: 1px solid rgba(192,132,252,0.3);
-    background: rgba(124,58,237,0.12);
-    font-size: 12px; color: rgba(236,234,245,0.8);
-    letter-spacing: 0.04em; backdrop-filter: blur(6px);
-    margin-bottom: 22px;
-  }
-  .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #c084fc; box-shadow: 0 0 10px #c084fc; }
-
-  .hero h1 { font-size: clamp(30px, 4vw, 52px); font-weight: 300; line-height: 1.18; letter-spacing: -0.01em; margin-bottom: 14px; }
-  .hero h1 .accent {
-    background: linear-gradient(90deg, #e9d5ff, #c084fc 60%, #a855f7);
-    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 400;
-  }
-  .hero p { font-size: 15px; font-weight: 300; color: rgba(236,234,245,0.55); max-width: 560px; line-height: 1.7; }
-  .hero-stats { display: flex; gap: 40px; margin-top: 34px; }
-  .stat .num { font-size: 26px; font-weight: 500; color: #fff; letter-spacing: -0.01em; }
-  .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; letter-spacing: 0.02em; }
-
-  /* ---------- main ---------- */
-  .main { max-width: 1120px; margin: 0 auto; padding: 64px 6vw 96px; }
-  .section { margin-bottom: 56px; }
-  .section:last-child { margin-bottom: 0; }
-  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
-  .section-title { display: flex; align-items: baseline; gap: 12px; }
-  .section-title h2 { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: 0.01em; }
-  .section-title .count { font-size: 12px; font-weight: 400; color: var(--dim); font-variant-numeric: tabular-nums; }
-  .section-hint { font-size: 11px; color: var(--dim); letter-spacing: 0.06em; text-transform: uppercase; }
-  .group-desc { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; font-weight: 300; }
-
-  /* ---------- row ---------- */
-  .list { display: flex; flex-direction: column; gap: 2px; }
-  .row {
-    position: relative; display: grid;
-    grid-template-columns: 40px 1fr auto; align-items: center; gap: 18px;
-    padding: 14px 16px; border-radius: 10px; cursor: pointer;
-    transition: background 0.18s ease, transform 0.18s ease; overflow: hidden;
-  }
-  .row:hover { background: #110f1c; transform: translateX(3px); }
-
-  .row-bar {
-    width: 40px; height: 40px; border-radius: 9px; flex-shrink: 0;
-    position: relative; overflow: hidden;
-    background: linear-gradient(135deg, var(--accent-soft), rgba(255,255,255,0.02));
-    border: 1px solid rgba(255,255,255,0.06);
-  }
-  .row-bar::before {
-    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-    background: var(--accent); box-shadow: 0 0 12px var(--accent);
-    transition: width 0.18s ease;
-  }
-  .row:hover .row-bar::before { width: 6px; }
-
-  .row-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .row-name { font-size: 14px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
-  .row-name-input { font-size: 14px; font-weight: 500; color: #fff; background: #14131f; border: 1px solid rgba(124,58,237,0.6); border-radius: 6px; padding: 3px 10px; outline: none; font-family: inherit; min-width: 220px; }
-  .row-file { font-size: 11px; color: var(--dim); font-family: 'SF Mono', 'Fira Mono', ui-monospace, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-  .row-actions { display: flex; gap: 2px; align-items: center; opacity: 0; transform: translateX(6px); transition: opacity 0.18s ease, transform 0.18s ease; flex-shrink: 0; }
-  .row:hover .row-actions { opacity: 1; transform: translateX(0); }
-  .row-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 7px; border: none; cursor: pointer; background: transparent; transition: background 0.14s, color 0.14s; }
-  .row-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  .row-btn-open  { color: #56506e; }
-  .row-btn-open:hover  { background: #1a1828; color: #c8c2dc; }
-  .row-btn-delete { color: #463a44; }
-  .row-btn-delete:hover { background: #2a1212; color: #e07070; }
-
-  .empty { color: var(--dim); font-size: 13px; padding: 60px 0; text-align: center; }
-
-  @media (max-width: 640px) {
-    .hero-stats { gap: 24px; }
-    .row-actions { opacity: 1; transform: none; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ModelGo · 官网设计稿目录</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans:['Inter','sans-serif'], playfair:['Playfair Display','serif'] },
+      colors: { brand:{ DEFAULT:'#4f46e5', soft:'#eef2ff', deep:'#3730a3' } }
+    } } }
+  </script>
+  <style>
+    *{font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif}
+    .font-playfair{font-family:'Playfair Display',serif}
+    body{background:#0b1020;color:#e2e8f0}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);transition:.25s}
+    .card:hover{border-color:rgba(129,140,248,.5);transform:translateY(-3px);box-shadow:0 18px 40px rgba(79,70,229,.18)}
+    .eyebrow{letter-spacing:.22em}
+    .glow{background:radial-gradient(60% 60% at 50% 0%,rgba(79,70,229,.25),transparent 70%)}
+  </style>
 </head>
-<body>
+<body class="antialiased">
+  <div class="glow absolute inset-x-0 top-0 h-[420px] pointer-events-none"></div>
 
-<div class="hero">
-  <img class="hero-bg" src="hero-concept.svg" alt="">
-  <div class="hero-inner">
-    <div class="hero-badge"><span class="dot"></span>企业级 AI 网关 · 设计预览</div>
-    <h1>
-      聚合主流大模型<br>
-      <span class="accent">构建企业级 AI 用量治理体系</span>
-    </h1>
-    <p>一个网关，接入全球与国内主流大模型。下方为各页面预览入口，点击卡片打开对应设计稿。</p>
-    <div class="hero-stats">
-      <div class="stat"><div class="num" id="statPages">0</div><div class="lbl">预览页面</div></div>
-      <div class="stat"><div class="num" id="statGroups">0</div><div class="lbl">页面分组</div></div>
-      <div class="stat"><div class="num">8</div><div class="lbl">聚合模型</div></div>
-    </div>
-  </div>
-</div>
+  <main class="relative max-w-6xl mx-auto px-6 py-16">
+    <header class="mb-14">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="w-9 h-9 rounded-xl bg-brand flex items-center justify-center text-white font-extrabold">M</span>
+        <span class="eyebrow text-xs font-semibold text-indigo-300/80 uppercase">ModelGo · Design Index</span>
+      </div>
+      <h1 class="font-playfair italic text-4xl sm:text-5xl text-white leading-tight">官网设计稿目录</h1>
+      <p class="mt-4 text-slate-400 max-w-2xl leading-relaxed">
+        ModelGo 首页的设计变体与对接文档，集中在这里。点卡片进对应页面。
+      </p>
+    </header>
 
-<div class="main" id="main"></div>
+    <section class="mb-16">
+      <h2 class="text-xs eyebrow font-bold text-slate-500 uppercase mb-5">在用 · 设计稿 &amp; 文档</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
-<script>
-const PAGES = [
-  { file: 'purple-hero.html',                     name: 'AI 用量治理 · 紫色首屏',       accent: '#a855f7', soft: 'rgba(168,85,247,0.18)' },
-  { file: 'ai-gateway-hero.html',                 name: 'AI 网关 · 聚合主流大模型',      accent: '#c084fc', soft: 'rgba(192,132,252,0.18)' },
-  { file: 'business-reimagined.html',             name: '次元共生 · 企业 AI 用量治理',   accent: '#8b5cf6', soft: 'rgba(139,92,246,0.18)' },
-  { file: 'modelgo-domestic-blue-purple-bg.html', name: 'ModelGo 国内 · 蓝紫背景',       accent: '#6366f1', soft: 'rgba(99,102,241,0.18)' },
-  { file: 'modelgo-domestic-hero-motion.html',    name: 'ModelGo 国内 · 首屏动效',       accent: '#7c3aed', soft: 'rgba(124,58,237,0.18)' },
-  { file: 'modelgo-domestic-reimagined.html',     name: 'ModelGo 国内 · 用量治理首屏',   accent: '#6d28d9', soft: 'rgba(109,40,217,0.18)' },
-];
+        <a href="ai-gateway-hero.html" class="card rounded-2xl p-6 block">
+          <div class="text-[11px] eyebrow text-indigo-300/70 uppercase mb-3">Hero · Gateway</div>
+          <div class="text-lg font-bold text-white mb-1.5">聚合主流大模型</div>
+          <p class="text-sm text-slate-400 leading-relaxed">企业级 AI 用量治理体系首屏（AI Gateway 版）</p>
+          <div class="mt-4 text-xs text-slate-500">ai-gateway-hero.html →</div>
+        </a>
 
-const GROUPS = [
-  { key: 'gateway',    title: 'AI 网关',      desc: '聚合主流大模型的核心网关页与配套设计。' },
-  { key: 'governance', title: 'AI 用量治理',  desc: '企业级 AI 用量与成本治理的首屏设计稿。' },
-  { key: 'modelgo',    title: 'ModelGo 国内', desc: '面向国内场景的用量治理方案，蓝紫渐变与动效探索。' },
-];
+        <a href="business-reimagined.html" class="card rounded-2xl p-6 block">
+          <div class="text-[11px] eyebrow text-indigo-300/70 uppercase mb-3">Landing · Business</div>
+          <div class="text-lg font-bold text-white mb-1.5">企业级 AI 用量治理</div>
+          <p class="text-sm text-slate-400 leading-relaxed">面向企业的完整落地页（Business 版）</p>
+          <div class="mt-4 text-xs text-slate-500">business-reimagined.html →</div>
+        </a>
 
-function groupKeyOf(p) {
-  const n = p.name;
-  if (n.startsWith('ModelGo'))  return 'modelgo';
-  if (n.startsWith('次元共生')) return 'gateway';
-  if (n.startsWith('AI 网关'))  return 'gateway';
-  return 'governance';
-}
+        <a href="purple-hero.html" class="card rounded-2xl p-6 block">
+          <div class="text-[11px] eyebrow text-indigo-300/70 uppercase mb-3">Hero · Purple</div>
+          <div class="text-lg font-bold text-white mb-1.5">AI 用量治理</div>
+          <p class="text-sm text-slate-400 leading-relaxed">紫色主视觉首屏方案</p>
+          <div class="mt-4 text-xs text-slate-500">purple-hero.html →</div>
+        </a>
 
-let names   = JSON.parse(localStorage.getItem('html-preview-names')   || '{}');
-let deleted = JSON.parse(localStorage.getItem('html-preview-deleted') || '[]');
+        <a href="首页文案结构说明.html" class="card rounded-2xl p-6 block sm:col-span-2 lg:col-span-1 ring-1 ring-brand/40">
+          <div class="text-[11px] eyebrow text-amber-300/80 uppercase mb-3">Doc · 设计对接</div>
+          <div class="text-lg font-bold text-white mb-1.5">首页文案结构说明</div>
+          <p class="text-sm text-slate-400 leading-relaxed">给设计师看的文案层级 + 区块讲解（4 大平台能力等）</p>
+          <div class="mt-4 text-xs text-slate-500">首页文案结构说明.html →</div>
+        </a>
 
-function save() {
-  localStorage.setItem('html-preview-names',   JSON.stringify(names));
-  localStorage.setItem('html-preview-deleted', JSON.stringify(deleted));
-}
-function isVisible(p) { return !deleted.includes(p.file); }
+      </div>
+    </section>
 
-function render() {
-  const main = document.getElementById('main');
-  main.innerHTML = '';
-
-  const totalVisible = PAGES.filter(isVisible).length;
-  document.getElementById('statPages').textContent  = totalVisible;
-  document.getElementById('statGroups').textContent = GROUPS.filter(g => PAGES.some(p => groupKeyOf(p) === g.key && isVisible(p))).length;
-
-  GROUPS.forEach(group => {
-    const pages = PAGES.filter(p => groupKeyOf(p) === group.key && isVisible(p));
-    if (!pages.length) return;
-
-    const sec = document.createElement('section');
-    sec.className = 'section';
-
-    const head = document.createElement('div');
-    head.className = 'section-head';
-    head.innerHTML = '<div class="section-title"><h2>' + group.title + '</h2><span class="count">' + pages.length + ' 个页面</span></div><span class="section-hint">点击打开</span>';
-    sec.appendChild(head);
-
-    const desc = document.createElement('div');
-    desc.className = 'group-desc';
-    desc.textContent = group.desc;
-    sec.appendChild(desc);
-
-    const list = document.createElement('div');
-    list.className = 'list';
-
-    pages.forEach(p => {
-      const displayName = names[p.file] || p.name;
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.style.setProperty('--accent', p.accent);
-      row.style.setProperty('--accent-soft', p.soft);
-      row.dataset.file = p.file;
-
-      row.innerHTML =
-        '<div class="row-bar"></div>' +
-        '<div class="row-info">' +
-          '<div class="row-name" title="双击重命名">' + displayName + '</div>' +
-          '<div class="row-file">' + p.file + '</div>' +
-        '</div>' +
-        '<div class="row-actions">' +
-          '<button class="row-btn row-btn-open" title="新窗口打开"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>' +
-          '<button class="row-btn row-btn-delete" title="移除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
-        '</div>';
-
-      row.querySelector('.row-btn-open').addEventListener('click', e => { e.stopPropagation(); window.open(p.file); });
-      row.querySelector('.row-btn-delete').addEventListener('click', e => { e.stopPropagation(); deleteRow(row, p.file); });
-      const nameEl = row.querySelector('.row-name');
-      nameEl.addEventListener('dblclick', e => { e.stopPropagation(); startRename(nameEl, p.file); });
-      row.addEventListener('click', () => { window.location.href = p.file; });
-
-      list.appendChild(row);
-    });
-
-    sec.appendChild(list);
-    main.appendChild(sec);
-  });
-
-  if (!totalVisible) main.innerHTML = '<div class="empty">没有页面</div>';
-}
-
-function startRename(nameEl, file) {
-  const current = names[file] || PAGES.find(p => p.file === file)?.name || '';
-  const input = document.createElement('input');
-  input.className = 'row-name-input';
-  input.value = current;
-  nameEl.replaceWith(input);
-  input.focus();
-  input.select();
-
-  function restore(text) {
-    const fresh = document.createElement('div');
-    fresh.className = 'row-name';
-    fresh.title = '双击重命名';
-    fresh.textContent = text;
-    fresh.addEventListener('dblclick', e => { e.stopPropagation(); startRename(fresh, file); });
-    input.replaceWith(fresh);
-  }
-  function commit() {
-    const val = input.value.trim();
-    const original = PAGES.find(p => p.file === file)?.name || '';
-    if (val && val !== original) { names[file] = val; }
-    else if (!val) { delete names[file]; }
-    save();
-    restore(names[file] || original);
-  }
-  input.addEventListener('blur', commit);
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') input.blur();
-    if (e.key === 'Escape') restore(names[file] || PAGES.find(p => p.file === file)?.name || file);
-  });
-}
-
-function deleteRow(row, file) {
-  row.style.transition = 'opacity 0.2s, transform 0.2s';
-  row.style.opacity = '0';
-  row.style.transform = 'translateX(12px)';
-  setTimeout(() => { deleted.push(file); save(); render(); }, 200);
-}
-
-render();
-</script>
+    <footer class="mt-20 pt-8 border-t border-white/5 text-xs text-slate-600">
+      © 2026 ModelGo · 设计稿目录（本地预览）
+    </footer>
+  </main>
 </body>
 </html>
